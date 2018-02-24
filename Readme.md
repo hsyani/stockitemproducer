@@ -1,2 +1,10 @@
+===========
+EXPLANATION
+===========
+This Software recommends stock items in KOSPI with specific method.
 
-Using kiwoom API
+===========
+REQUIREMENT
+===========
+Python > 3
+KIWOOM API
