@@ -1,6 +1,7 @@
 
-from kwapi import Kiwoom as kwapi
-from kwapi import Timeutil as tu
+from userutil import Kiwoom as kwapi
+from userutil import Timeutil as tu
+import gparser
 
 import sys, os
 import time
@@ -104,8 +105,8 @@ class ItemSelector:
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-
     print("Find stock items for " + str(TODAY))
     sl = ItemSelector()
     sl.stock_item_selector()
+    gparser.gparser('./itemlist/', TODAY + '.csv')
     print("today successful finish")
