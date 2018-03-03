@@ -1,16 +1,14 @@
+from userutil import Devutil as util
+from userutil import KWutil
+
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
 from PyQt5.QtCore import *
-import time
-import pandas as pd
-import sqlite3
-from kwapi import Localutil as util
-from kwapi import KWutil
+
+MARKET_OPEN = ['0900', '1530']
 
 TR_REQ_TIME_INTERVAL = 0.2
-CONDITION_NAME1 = '검색왕 스켈핑'
-CONDITION_NAME2 = '검색왕 스켈핑ver1.0'
 
 sendConditionScreenNo = "001"
 
@@ -126,8 +124,8 @@ class Kiwoom(QAxWidget):
 
         if( realType == "업종지수" ):
             result = ''
-            for col_name in kw_util.dict_jusik['실시간-업종지수']:
-                result = self.get_comm_real_data(jongmokCode, kw_util.name_fid[col_name])
+            for col_name in KWutil.dict_jusik['실시간-업종지수']:
+                result = self.get_comm_real_data(jongmokCode, KWutil.name_fid[col_name])
                 if( col_name == '등락율'):
                     if( jongmokCode == '001'):
                         self.upjongUpdownPercent['코스피'] = result
@@ -156,7 +154,6 @@ class Kiwoom(QAxWidget):
             .format(ret, msg))
         if ret == 1:
             pass
-
 
         # print(util.whoami() + 'ret: {}, msg: {}'
         #     .format(ret, msg))
@@ -253,8 +250,8 @@ class Kiwoom(QAxWidget):
         result = self.dynamicCall("GetRepeatCnt(QString, QString)", trcode, rqname)
         return result
     def comm_get_data(self, code, real_type, field_name, index, item_name):
-        result = self.dynamicCall("CommGetData(QString, QString, QString, int, QString)", code,
-                               real_type, field_name, index, item_name).strip()
+        result = self.dynamicCall("CommGetData(QString, QString, QString, int, QString)",
+                                  code, real_type, field_name, index, item_name).strip()
         return result
     def get_comm_real_data(self, realType, fid):
         return self.dynamicCall("GetCommRealData(QString, int)", realType, fid).strip()
@@ -294,8 +291,6 @@ class Kiwoom(QAxWidget):
     def get_master_code_name(self, code):
         code_name = self.dynamicCall("GetMasterCodeName(QString)", code)
         return code_name
-
-
     def get_server_gubun(self):
         ret = self.dynamicCall("KOA_Functions(QString, QString)", "GetServerGubun", "")
         return ret
@@ -333,10 +328,10 @@ class Kiwoom(QAxWidget):
         self.set_input_value('비빌번호입력매체구분', '00')
         self.set_input_value('조회구분', '1')
 
-        ret = self.comm_rq_data(account_num, "opw00018", 0, kw_util.sendJusikAccountInfoScreenNo)
+        ret = self.comm_rq_data(account_num, "opw00018", 0, KWutil.sendJusikAccountInfoScreenNo)
         errorString = None
         if (ret != 0):
-            errorString = account_num + " commRqData() " + kw_util.parseErrorCode(str(ret))
+            errorString = account_num + " commRqData() " + KWutil.parseErrorCode(str(ret))
             print(util.whoami() + errorString)
             util.save_log(errorString, util.whoami(), folder="log")
             return False
@@ -481,7 +476,7 @@ class Kiwoom(QAxWidget):
     def test_getlist(self):
         print("conditionload : " + str(kiwoom.get_condition_load()))
         print("namelist : " + kiwoom.get_condition_name_list())
-        result = kiwoom.send_condition(KWutil.sendConditionScreenNo, CONDITION_NAME2, 1, 0)
+        result = kiwoom.send_condition(KWutil.sendConditionScreenNo, "검색왕", 1, 0)
         print("sendcondition : " + str(result))
 
 

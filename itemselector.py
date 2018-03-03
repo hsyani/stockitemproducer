@@ -14,7 +14,7 @@ from pandas import DataFrame
 MARKET_KOSPI   = 0
 MARKET_KOSDAQ  = 10
 
-TODAY = tu.gettoday()
+LastMarketDay = tu.getOpenMarketDateFromToday(tu.isWeekend())
 
 class ItemSelector:
     def __init__(self):
@@ -33,7 +33,7 @@ class ItemSelector:
         self.kiwoom.singlebasket = {'date': [], 'open': [], 'high': [], 'low': [], 'close': [], 'volume': [],
                                     'status': []}
         self.kiwoom.set_input_value("종목코드", code)
-        self.kiwoom.set_input_value("조회일자", TODAY)
+        self.kiwoom.set_input_value("조회일자", LastMarketDay)
 
         self.kiwoom.comm_rq_data("opt10086_req", "opt10086", 0, "0124")
 
@@ -97,16 +97,16 @@ class ItemSelector:
         df = self.filter_by_gap(df)
         print(df)
         try:
-            df.to_csv('./itemlist/'+str(TODAY)+'.csv', encoding='utf-8')
+            df.to_csv('./itemlist/' + str(LastMarketDay) + '.csv', encoding='utf-8')
         except:
             os.mkdir('./itemlist/')
-            df.to_csv('./itemlist/'+str(TODAY)+'.csv', encoding='utf-8')
+            df.to_csv('./itemlist/' + str(LastMarketDay) + '.csv', encoding='utf-8')
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    print("Find stock items for " + str(TODAY))
+    print("Find stock items for " + str(LastMarketDay))
     sl = ItemSelector()
     sl.stock_item_selector()
-    gparser.gparser('./itemlist/', TODAY + '.csv')
+    gparser.gparser('./itemlist/', LastMarketDay + '.csv')
     print("today successful finish")
