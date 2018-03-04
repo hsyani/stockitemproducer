@@ -1,7 +1,7 @@
 
 from userutil import Kiwoom as kwapi
 from userutil import Timeutil as tu
-import gparser
+from userutil import Fileutil as fu
 
 import sys, os
 import time
@@ -13,7 +13,7 @@ from pandas import DataFrame
 
 MARKET_KOSPI   = 0
 MARKET_KOSDAQ  = 10
-
+FILEDIR = './itemlist'
 LastMarketDay = tu.getOpenMarketDateFromToday(tu.isWeekend())
 
 class ItemSelector:
@@ -97,16 +97,17 @@ class ItemSelector:
         df = self.filter_by_gap(df)
         print(df)
         try:
-            df.to_csv('./itemlist/' + str(LastMarketDay) + '.csv', encoding='utf-8')
+            df.to_csv(FILEDIR + '/' + str(LastMarketDay) + '.csv', encoding='utf-8')
         except:
-            os.mkdir('./itemlist/')
-            df.to_csv('./itemlist/' + str(LastMarketDay) + '.csv', encoding='utf-8')
+            os.mkdir(FILEDIR)
+            df.to_csv(FILEDIR + '/' + str(LastMarketDay) + '.csv', encoding='utf-8')
 
 
 if __name__ == "__main__":
+
     app = QApplication(sys.argv)
     print("Find stock items for " + str(LastMarketDay))
     sl = ItemSelector()
     sl.stock_item_selector()
-    gparser.gparser('./itemlist/', LastMarketDay + '.csv')
+    fu.uploadfile(FILEDIR, LastMarketDay + '.csv')
     print("today successful finish")
