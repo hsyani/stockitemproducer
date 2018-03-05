@@ -9,7 +9,6 @@ import time
 import pandas as pd
 
 from PyQt5.QtWidgets import *
-from pandas import DataFrame
 
 MARKET_KOSPI   = 0
 MARKET_KOSDAQ  = 10
@@ -29,7 +28,7 @@ class ItemSelector:
         self.kosdaq_codes = self.kiwoom.get_code_list_by_market(MARKET_KOSDAQ)
 
 
-    def get_items_attr(self, code):
+    def get_item_daily_price(self, code='033180'):
         self.kiwoom.singlebasket = {'date': [], 'open': [], 'high': [], 'low': [], 'close': [], 'volume': [],
                                     'status': []}
         self.kiwoom.set_input_value("종목코드", code)
@@ -37,8 +36,22 @@ class ItemSelector:
 
         self.kiwoom.comm_rq_data("opt10086_req", "opt10086", 0, "0124")
 
-        df = DataFrame(self.kiwoom.singlebasket, columns=['date', 'open', 'high', 'low', 'close', 'volume', 'stauts'],
-                       index=self.kiwoom.singlebasket['date'])
+        df = pd.DataFrame(self.kiwoom.singlebasket,
+                          columns=['date', 'open', 'high', 'low', 'close', 'volume', 'stauts'],
+                          index=self.kiwoom.singlebasket['date'])
+        time.sleep(0.3)
+
+        return df
+
+    def get_items_basic_info(self, code='033180'):
+        self.kiwoom.basket = {'itemno': [], 'itemname': [], 'open': [], 'high': [], 'low': [],
+                              'close': [], 'lastclose': [], 'low250': [], 'volume': []}
+        self.kiwoom.set_input_value("종목코드", code)
+        self.kiwoom.comm_rq_data("opt10001_req", "opt10001", 0, "0286")
+
+        df = pd.DataFrame(self.kiwoom.basket,
+                          columns=['itemno', 'itemname', 'open', 'high', 'low',
+                                   'close', 'lastclose', 'low250', 'volume'])
         time.sleep(0.3)
 
         return df
@@ -51,7 +64,7 @@ class ItemSelector:
 
         self.kiwoom.comm_rq_data("opt10030_req", "opt10030", 0, "0184")
 
-        df = DataFrame(self.kiwoom.basket, columns=['itemname', 'itemprice', 'itemfluct', 'itemvolume', 'itemamount', 'itembefore'],
+        df = pd.DataFrame(self.kiwoom.basket, columns=['itemname', 'itemprice', 'itemfluct', 'itemvolume', 'itemamount', 'itembefore'],
                        index=self.kiwoom.basket['itemcode'])
 
         return df
@@ -62,7 +75,7 @@ class ItemSelector:
 
         df = df [df['itemvolume'] > 100000]
         df = df [df['itemprice'] > 3000]
-        df = df [df ['itemfluct'] > 5]
+        df = df [df ['itemfluct'] > 4]
 
         df = df.sort_values(by = 'itemvolume', ascending=False)
         return df
@@ -75,16 +88,18 @@ class ItemSelector:
 
 
     def is_filter_by_gap(self, code):
-        df = self.get_items_attr(code)
+        df = self.get_items_basic_info(code)
 
-        todayopen = df['open'][0]
-        lastdayclose = df['close'][1]
+        todayopen = df.at[0, 'open']
+        lastdayclose = df.at[0, 'lastclose']
+        low250 = abs(df.at[0, 'low250'])
+
         gap = (todayopen - lastdayclose) / lastdayclose * 100
-        if gap > 5:
+
+        if gap > 5 or todayopen > low250*1.3:
             return True
         else:
             return False
-
 
     def stock_item_selector(self):
         # KOSPI 종목 거래량 상위 100 get
@@ -95,7 +110,6 @@ class ItemSelector:
         df = self.merge_and_filter_by_vol_pri_fluct(kospi_items, kosdaq_items)
         # 5프로 이상 Gap 필터
         df = self.filter_by_gap(df)
-        print(df)
         try:
             df.to_csv(FILEDIR + '/' + str(LastMarketDay) + '.csv', encoding='utf-8')
         except:
@@ -104,7 +118,6 @@ class ItemSelector:
 
 
 if __name__ == "__main__":
-
     app = QApplication(sys.argv)
     print("Find stock items for " + str(LastMarketDay))
     sl = ItemSelector()

@@ -74,8 +74,9 @@ class Kiwoom(QAxWidget):
             self.remained_data = True
         else:
             self.remained_data = False
-
-        if rqname == "opt10005_req":
+        if rqname == "opt10001_req":
+            self._opt10001(rqname, trcode)
+        elif rqname == "opt10005_req":
             self._opt10005(rqname, trcode)
         elif rqname == "opt10015_req":
             self._opt10015(rqname, trcode)
@@ -383,6 +384,27 @@ class Kiwoom(QAxWidget):
 
             self.opw00018_output['multi'].append([name, quantity, purchase_price, current_price, eval_profit_loss_price,
                                                   earning_rate])
+
+    def _opt10001(self, rqname, trcode):
+        itemno = self.comm_get_data(trcode, "", rqname, 0, "종목코드")
+        itemname = self.comm_get_data(trcode, "", rqname, 0, "종목명")
+        open = self.comm_get_data(trcode, "", rqname, 0, "시가")
+        high = self.comm_get_data(trcode, "", rqname, 0, "고가")
+        low = self.comm_get_data(trcode, "", rqname, 0, "저가")
+        close = self.comm_get_data(trcode, "", rqname, 0, "현재가")
+        lastclose = self.comm_get_data(trcode, "", rqname, 0, "기준가")
+        low250 = self.comm_get_data(trcode, "", rqname, 0, "250최저")
+        volume = self.comm_get_data(trcode, "", rqname, 0, "거래량")
+
+        self.basket['itemno'].append(int(itemno))
+        self.basket['itemname'].append(itemname)
+        self.basket['open'].append(int(open))
+        self.basket['high'].append(int(high))
+        self.basket['low'].append(int(low))
+        self.basket['close'].append(int(close))
+        self.basket['lastclose'].append(int(lastclose))
+        self.basket['low250'].append(int(low250))
+        self.basket['volume'].append(int(volume))
 
 
     def _opt10005(self, rqname, trcode):
