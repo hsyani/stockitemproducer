@@ -7,8 +7,8 @@ from PyQt5.QAxContainer import *
 from PyQt5.QtCore import *
 
 MARKET_OPEN = ['0900', '1530']
-
-TR_REQ_TIME_INTERVAL = 0.2
+ETF_ITEM = ['233740']
+TR_REQ_TIME_INTERVAL = 0.3
 
 sendConditionScreenNo = "001"
 
@@ -90,11 +90,12 @@ class Kiwoom(QAxWidget):
             self._opw00001(rqname, trcode)
         elif rqname == "opw00018_req":
             self._opw00018(rqname, trcode)
-
         try:
             self.tr_event_loop.exit()
-        except AttributeError:
-            pass
+        except Exception as ae:
+            print(ae)
+            print('receive tr data error')
+            return
     def _on_receive_real_data(self, jongmokCode, realType, realData):
         util.debug_parent_prt("")
 
@@ -237,8 +238,7 @@ class Kiwoom(QAxWidget):
                 and isinstance(screen_no, str)):
             raise ParameterTypeError()
 
-        return_code = self.dynamicCall("CommRqData(QString, QString, int, QString)", rqname, trcode, next,
-                                       screen_no)
+        return_code = self.dynamicCall("CommRqData(QString, QString, int, QString)", rqname, trcode, next, screen_no)
 
         if return_code != ReturnCode.OP_ERR_NONE:
             raise KiwoomProcessingError("comm_rq_data(): " + ReturnCode.CAUSE[return_code])
@@ -395,6 +395,7 @@ class Kiwoom(QAxWidget):
         lastclose = self.comm_get_data(trcode, "", rqname, 0, "기준가")
         low250 = self.comm_get_data(trcode, "", rqname, 0, "250최저")
         volume = self.comm_get_data(trcode, "", rqname, 0, "거래량")
+        profit = self.comm_get_data(trcode, "", rqname, 0, "영업이익")
 
         self.basket['itemno'].append(int(itemno))
         self.basket['itemname'].append(itemname)
@@ -405,6 +406,10 @@ class Kiwoom(QAxWidget):
         self.basket['lastclose'].append(int(lastclose))
         self.basket['low250'].append(int(low250))
         self.basket['volume'].append(int(volume))
+        try:
+            self.basket['profit'].append(int(profit))
+        except:
+            self.basket['profit'].append("-")
 
 
     def _opt10005(self, rqname, trcode):
@@ -432,9 +437,10 @@ class Kiwoom(QAxWidget):
         for i in range(data_cnt):
             date = self.comm_get_data(trcode, "", rqname, i, "일자")
             price = self.comm_get_data(trcode, "", rqname, i, "종가")
-
-            self.basket['date'].append(date)
-            self.basket['price'].append(abs(int(price)))
+            volume = self.comm_get_data(trcode, "", rqname, i, "거래량")
+            self.multibasket['date'].append(date)
+            self.multibasket['price'].append(abs(int(price)))
+            self.multibasket['volume'].append(volume)
 
     def _opt10030(self, rqname, trcode):
         data_cnt = self.get_repeat_cnt(trcode, rqname)
@@ -467,12 +473,12 @@ class Kiwoom(QAxWidget):
             close = self.comm_get_data(trcode, "", rqname, i, "현재가")
             volume = self.comm_get_data(trcode, "", rqname, i, "거래량")
 
-            self.ohlcv['date'].append(date)
-            self.ohlcv['open'].append(int(open))
-            self.ohlcv['high'].append(int(high))
-            self.ohlcv['low'].append(int(low))
-            self.ohlcv['close'].append(int(close))
-            self.ohlcv['volume'].append(int(volume))
+            self.multibasket['date'].append(date)
+            self.multibasket['open'].append(int(open))
+            self.multibasket['high'].append(int(high))
+            self.multibasket['low'].append(int(low))
+            self.multibasket['close'].append(int(close))
+            self.multibasket['volume'].append(int(volume))
 
     def _opt10086(self, rqname, trcode):
         data_cnt = self.get_repeat_cnt(trcode, rqname)

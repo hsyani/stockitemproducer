@@ -1,23 +1,38 @@
-============
-TODO 18.3.5
-============
-- txt 로 저장
+- automating execution of itemselector without permission from Googgle
+- last 30days compare filter
+- simulaotr
+- 외국인 매수세 그래프
+- 섹터별 그래프
+- 시세포착
 - daily selector
-- 영업이익 포함
-- gap 값 변경
-- 16-24 실행 일 경우만 제대로 / 그 이후일 경우 -1 date
 - 1차, 2차, 3차 매수가 / 목표가 / 손절가 추가 저장
 - alarm when 3차 매수가 도달
 
+
 ============
-TODO 18.3.4
+Done 18.4.1
+============
+- profit default value setting as 0
+- add 'selection' with default value as 0
+- 16-24 시 실행 일 경우만 제대로 / 그 이후일 경우 -1 date
+
+
+============
+Done 18.3.5
+============
+- txt 로 저장
+- gap 값 변경
+- 영업이익 포함
+
+============
+Done 18.3.4
 ============
 - 종목필터 손보기 : 당일종가 < 52주 최저가*1.3
 - daily selector
 - 1차, 2차, 3차 매수가 / 목표가 / 손절가 추가 저장
 
 ============
-TODO 18.3.3
+Done 18.3.3
 ============
 - 종목필터 손보기
 - daily selector
